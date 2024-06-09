@@ -40,8 +40,19 @@ async def audit_log_to_json(guild: discord.Guild):
 """
         logs_json.append(log_dict)
 
-    print(logs_json, type(logs_json))
     return logs_json
+
+
+def audit_log_to_csv(audit_log):
+    tmp = tempfile.NamedTemporaryFile(mode="w")
+    tmp.write(",".join(audit_log[0].keys()))
+    tmp.write("\n")
+    for log_dict in audit_log[1:]:
+        for value in log_dict.values():
+            tmp.write(f"{value},")
+        tmp.write("\n")
+
+    return tmp
 
 
 @bot.event
@@ -50,24 +61,30 @@ async def on_ready():
 
 
 def data_type_autocomplete(ctc: discord.AutocompleteContext):
-    options = ["JSON", "Excel"]
+    options = ["JSON", "CSV"]
     return options
 
 
 @bot.slash_command(name="export")
 async def export(ctx,
                  data_type: discord.Option(name="data_type",
-                      description="Which data type should the audit log be exported in?",
-                      required=True,
-                      input_type=discord.SlashCommandOptionType.string,
-                      autocomplete=data_type_autocomplete
-                      )
+                                           description="Which data type should the audit log be exported in?",
+                                           required=True,
+                                           input_type=discord.SlashCommandOptionType.string,
+                                           autocomplete=data_type_autocomplete
+                                           )
                  ):
     if data_type == "JSON":
         audit_log_json = await audit_log_to_json(ctx.guild)
-        tmp = tempfile.NamedTemporaryFile(delete=True)
-        tmp.write(json.dumps(audit_log_json))
-        return await ctx.respond(file=discord.File(tmp.name))
+        with tempfile.NamedTemporaryFile(mode='w+b') as tmp:
+            tmp.write(json.dumps(audit_log_json, indent=4).encode())
+            tmp.seek(0)
+            await ctx.respond(file=discord.File(fp=tmp.name, filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.json"))
+    elif data_type == "CSV":
+        audit_log_json = await audit_log_to_json(ctx.guild)
+        temp_file = audit_log_to_csv(audit_log_json)
+        temp_file.seek(0)
+        await ctx.respond(file=discord.File(fp=temp_file.name, filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.csv"))
 
 
 bot.run(os.getenv("BOT_TOKEN"))
