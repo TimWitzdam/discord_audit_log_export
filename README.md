@@ -54,7 +54,7 @@ All commands that are available for the bot.
 |:------------------------------------|:--------------------------------------------------------------|
 | `/export [data_type] [(opt) limit]` | Exports your audit log to the desired data type (JSON or CSV) |
 | `/help`                             | Returns all commands of the bot                               |
-| `npm run build`                     | Sends the invite link configured in the .env                  |
+| `/invite`                           | Sends the invite link configured in the .env                  |
 
 
 ## 👀 Any questions or problems?
