@@ -15,8 +15,16 @@ def help():
     return embed
 
 
-def missing_permissions():
+def bot_missing_permissions():
     embed = discord.Embed(title="Missing permissions", description="The bot is missing permissions to access the audit "
+                                                                   "log.", color=discord.Color.red())
+    embed.set_footer(text="Made by @nightslide_",
+                     icon_url="https://witzdam.com/images/pfp.webp")
+    return embed
+
+
+def user_missing_permissions():
+    embed = discord.Embed(title="Missing permissions", description="You are missing permissions to access the audit "
                                                                    "log.", color=discord.Color.red())
     embed.set_footer(text="Made by @nightslide_",
                      icon_url="https://witzdam.com/images/pfp.webp")

@@ -63,12 +63,16 @@ async def export(ctx,
         await ctx.respond(embed=embeds.limit_exceeded())
         return
 
+    if not ctx.author.guild_permissions.view_audit_log:
+        await ctx.respond(embed=embeds.user_missing_permissions())
+        return
+
     await ctx.defer()
     if data_type == "JSON":
         try:
             logs = await ctx.guild.audit_logs(limit=int(limit)).flatten()
         except discord.errors.Forbidden:
-            await ctx.respond(embed=embeds.missing_permissions())
+            await ctx.respond(embed=embeds.bot_missing_permissions())
             return
         audit_log_json = await audit_log_formatter.to_json(logs)
         with tempfile.NamedTemporaryFile(mode='w+b') as tmp:
@@ -81,7 +85,7 @@ async def export(ctx,
         try:
             logs = await ctx.guild.audit_logs(limit=int(limit)).flatten()
         except discord.errors.Forbidden:
-            await ctx.respond(embed=embeds.missing_permissions())
+            await ctx.respond(embed=embeds.bot_missing_permissions())
             return
         temp_file = await audit_log_formatter.to_csv(logs)
         await ctx.respond(embed=embeds.successfully_exported(), file=discord.File(fp=temp_file.name,
