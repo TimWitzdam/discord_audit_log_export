@@ -1,13 +1,30 @@
+import asyncio
 import json
 from datetime import datetime
 import discord
 import os
+
+from discord.ext import tasks
 from dotenv import load_dotenv
 import tempfile
 import audit_log_formatter
+import embeds
 
 load_dotenv()
 bot = discord.Bot()
+
+
+@tasks.loop(seconds=185)
+async def game():
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/help"))
+    await asyncio.sleep(60)
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+                                                        name=str(len(bot.guilds)) + " Servers | /help"))
+    await asyncio.sleep(60)
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="/invite | /help"))
+    await asyncio.sleep(60)
+
+game.start()
 
 
 @bot.event
@@ -47,14 +64,18 @@ async def export(ctx,
         with tempfile.NamedTemporaryFile(mode='w+b') as tmp:
             tmp.write(json.dumps(audit_log_json, indent=4).encode())
             tmp.seek(0)
-            await ctx.respond(file=discord.File(fp=tmp.name,
-                                                filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.json"))
+            await ctx.respond(embed=embeds.successfully_exported(), file=discord.File(fp=tmp.name,
+                                                                                      filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.json"))
+            tmp.close()
     elif data_type == "CSV":
         logs = await ctx.guild.audit_logs(limit=limit).flatten()
         temp_file = await audit_log_formatter.to_csv(logs, limit)
         temp_file.seek(0)
-        await ctx.respond(file=discord.File(fp=temp_file.name,
-                                            filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.csv"))
+        await ctx.respond(embed=embeds.successfully_exported(), file=discord.File(fp=temp_file.name,
+                                                                                  filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.csv"))
+        temp_file.close()
+    else:
+        await ctx.respond(embed=embeds.invalid_data_type())
 
 
 bot.run(os.getenv("BOT_TOKEN"))
