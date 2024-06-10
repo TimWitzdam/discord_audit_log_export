@@ -31,6 +31,14 @@ def user_missing_permissions():
     return embed
 
 
+def no_audit_logs():
+    embed = discord.Embed(title="No audit logs", description="The audit logs of this server are empty.",
+                          color=discord.Color.red())
+    embed.set_footer(text="Made by @nightslide_",
+                     icon_url="https://witzdam.com/images/pfp.webp")
+    return embed
+
+
 def successfully_exported():
     embed = discord.Embed(title="Successfully exported",
                           description="The audit log has been successfully exported. \n\n"

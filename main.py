@@ -74,6 +74,9 @@ async def export(ctx,
         except discord.errors.Forbidden:
             await ctx.respond(embed=embeds.bot_missing_permissions())
             return
+        if len(logs) == 0:
+            await ctx.respond(embed=embeds.no_audit_logs())
+            return
         audit_log_json = await audit_log_formatter.to_json(logs)
         with tempfile.NamedTemporaryFile(mode='w+b') as tmp:
             tmp.write(json.dumps(audit_log_json, indent=4).encode())
@@ -86,6 +89,9 @@ async def export(ctx,
             logs = await ctx.guild.audit_logs(limit=int(limit)).flatten()
         except discord.errors.Forbidden:
             await ctx.respond(embed=embeds.bot_missing_permissions())
+            return
+        if len(logs) == 0:
+            await ctx.respond(embed=embeds.no_audit_logs())
             return
         temp_file = await audit_log_formatter.to_csv(logs)
         await ctx.respond(embed=embeds.successfully_exported(), file=discord.File(fp=temp_file.name,
