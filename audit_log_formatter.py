@@ -35,4 +35,5 @@ async def to_csv(audit_log, limit=1000):
             tmp.write(f"{value},")
         tmp.write("\n")
 
+    tmp.seek(0)
     return tmp

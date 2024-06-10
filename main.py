@@ -16,6 +16,8 @@ bot = discord.Bot()
 
 @tasks.loop(seconds=185)
 async def game():
+    if not bot.is_ready():
+        return
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/help"))
     await asyncio.sleep(60)
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
@@ -57,10 +59,10 @@ async def export(ctx,
     if data_type == "JSON":
         try:
             logs = await ctx.guild.audit_logs(limit=limit).flatten()
-            audit_log_json = await audit_log_formatter.to_json(logs, limit)
         except discord.errors.Forbidden:
-            await ctx.respond("The bot is missing permissions to access the audit log.")
+            await ctx.respond(embed=embeds.missing_permissions())
             return
+        audit_log_json = await audit_log_formatter.to_json(logs, limit)
         with tempfile.NamedTemporaryFile(mode='w+b') as tmp:
             tmp.write(json.dumps(audit_log_json, indent=4).encode())
             tmp.seek(0)
@@ -68,14 +70,27 @@ async def export(ctx,
                                                                                       filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.json"))
             tmp.close()
     elif data_type == "CSV":
-        logs = await ctx.guild.audit_logs(limit=limit).flatten()
+        try:
+            logs = await ctx.guild.audit_logs(limit=limit).flatten()
+        except discord.errors.Forbidden:
+            await ctx.respond(embed=embeds.missing_permissions())
+            return
         temp_file = await audit_log_formatter.to_csv(logs, limit)
-        temp_file.seek(0)
         await ctx.respond(embed=embeds.successfully_exported(), file=discord.File(fp=temp_file.name,
                                                                                   filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.csv"))
         temp_file.close()
     else:
         await ctx.respond(embed=embeds.invalid_data_type())
+
+
+@bot.slash_command(name="invite")
+async def invite(ctx):
+    await ctx.respond(embed=embeds.invite())
+
+
+@bot.slash_command(name="help")
+async def help(ctx):
+    await ctx.respond(embed=embeds.help())
 
 
 bot.run(os.getenv("BOT_TOKEN"))

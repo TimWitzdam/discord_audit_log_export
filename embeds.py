@@ -41,3 +41,12 @@ def invalid_data_type():
     embed.set_footer(text="Made by @nightslide_",
                      icon_url="https://witzdam.com/images/pfp.webp")
     return embed
+
+
+def invite():
+    embed = discord.Embed(title="Invite", description="You can invite me to your server by clicking "
+                                                      f"[here]({os.getenv('BOT_INVITE')})",
+                          color=0xf8c434)
+    embed.set_footer(text="Made by @nightslide_",
+                     icon_url="https://witzdam.com/images/pfp.webp")
+    return embed
