@@ -3,6 +3,7 @@ from datetime import datetime
 import inspect
 import discord
 import os
+
 from dotenv import load_dotenv
 import tempfile
 
@@ -17,8 +18,8 @@ def debug(argument):
     print(f'{current_time} - {cf.f_back.f_lineno}: {argument}')
 
 
-async def audit_log_to_json(guild: discord.Guild):
-    logs = await guild.audit_logs(limit=100).flatten()
+async def audit_log_to_json(guild: discord.Guild, limit=1000):
+    logs = await guild.audit_logs(limit=limit).flatten()
     logs_json = []
 
     for log in logs:
@@ -29,7 +30,6 @@ async def audit_log_to_json(guild: discord.Guild):
             'action': str(log.action.name),
             'reason': log.reason,
             'created_at': log.created_at.isoformat(),
-            'changes': []
         }
 
         """change_dict = {
@@ -72,19 +72,33 @@ async def export(ctx,
                                            required=True,
                                            input_type=discord.SlashCommandOptionType.string,
                                            autocomplete=data_type_autocomplete
-                                           )
+                                           ),
+                 limit: discord.Option(
+                     name="limit",
+                     description="How many entries should be exported? (Default: 1000)",
+                     required=False,
+                     input_type=discord.SlashCommandOptionType.integer,
+                     default=1000
+                 )
                  ):
+    await ctx.defer()
     if data_type == "JSON":
-        audit_log_json = await audit_log_to_json(ctx.guild)
+        try:
+            audit_log_json = await audit_log_to_json(ctx.guild, limit)
+        except discord.errors.Forbidden:
+            await ctx.respond("The bot is missing permissions to access the audit log.")
+            return
         with tempfile.NamedTemporaryFile(mode='w+b') as tmp:
             tmp.write(json.dumps(audit_log_json, indent=4).encode())
             tmp.seek(0)
-            await ctx.respond(file=discord.File(fp=tmp.name, filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.json"))
+            await ctx.respond(file=discord.File(fp=tmp.name,
+                                                filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.json"))
     elif data_type == "CSV":
-        audit_log_json = await audit_log_to_json(ctx.guild)
+        audit_log_json = await audit_log_to_json(ctx.guild, limit)
         temp_file = audit_log_to_csv(audit_log_json)
         temp_file.seek(0)
-        await ctx.respond(file=discord.File(fp=temp_file.name, filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.csv"))
+        await ctx.respond(file=discord.File(fp=temp_file.name,
+                                            filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.csv"))
 
 
 bot.run(os.getenv("BOT_TOKEN"))
