@@ -1,7 +1,7 @@
 import tempfile
 
 
-async def to_json(audit_log, limit=1000):
+async def to_json(audit_log):
     logs_json = []
 
     for log in audit_log:
@@ -25,8 +25,8 @@ async def to_json(audit_log, limit=1000):
     return logs_json
 
 
-async def to_csv(audit_log, limit=1000):
-    audit_log_json = await to_json(audit_log, limit)
+async def to_csv(audit_log):
+    audit_log_json = await to_json(audit_log)
     tmp = tempfile.NamedTemporaryFile(mode="w")
     tmp.write(",".join(audit_log_json[0].keys()))
     tmp.write("\n")

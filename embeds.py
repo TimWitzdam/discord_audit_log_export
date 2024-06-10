@@ -50,3 +50,12 @@ def invite():
     embed.set_footer(text="Made by @nightslide_",
                      icon_url="https://witzdam.com/images/pfp.webp")
     return embed
+
+
+def limit_exceeded():
+    embed = discord.Embed(title="Limit exceeded", description=f"The limit you entered is too high. "
+                                                              f"The maximum limit is {os.getenv('MAX_LIMIT')}.",
+                          color=discord.Color.red())
+    embed.set_footer(text="Made by @nightslide_",
+                     icon_url="https://witzdam.com/images/pfp.webp")
+    return embed

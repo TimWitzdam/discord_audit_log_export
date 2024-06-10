@@ -49,12 +49,20 @@ async def export(ctx,
                                            ),
                  limit: discord.Option(
                      name="limit",
-                     description="How many entries should be exported? (Default: 1000)",
+                     description=f"How many entries should be exported? (Default: {os.getenv('DEFAULT_LIMIT')})",
                      required=False,
                      input_type=discord.SlashCommandOptionType.integer,
-                     default=1000
+                     default=os.getenv("DEFAULT_LIMIT")
                  )
                  ):
+    try:
+        if int(limit) > int(os.getenv("MAX_LIMIT")):
+            await ctx.respond(embed=embeds.limit_exceeded())
+            return
+    except ValueError:
+        await ctx.respond(embed=embeds.limit_exceeded())
+        return
+
     await ctx.defer()
     if data_type == "JSON":
         try:
@@ -62,7 +70,7 @@ async def export(ctx,
         except discord.errors.Forbidden:
             await ctx.respond(embed=embeds.missing_permissions())
             return
-        audit_log_json = await audit_log_formatter.to_json(logs, limit)
+        audit_log_json = await audit_log_formatter.to_json(logs)
         with tempfile.NamedTemporaryFile(mode='w+b') as tmp:
             tmp.write(json.dumps(audit_log_json, indent=4).encode())
             tmp.seek(0)
@@ -75,7 +83,7 @@ async def export(ctx,
         except discord.errors.Forbidden:
             await ctx.respond(embed=embeds.missing_permissions())
             return
-        temp_file = await audit_log_formatter.to_csv(logs, limit)
+        temp_file = await audit_log_formatter.to_csv(logs)
         await ctx.respond(embed=embeds.successfully_exported(), file=discord.File(fp=temp_file.name,
                                                                                   filename=f"audit_log_export_{datetime.strftime(datetime.now(), '%d-%m-%Y, %H-%M-%S')}.csv"))
         temp_file.close()
