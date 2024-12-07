@@ -6,13 +6,14 @@ async def to_json(audit_log):
 
     for log in audit_log:
         log_dict = {
-            'target': f"{str(log.target)} ({str(log.target.id)})" if log.target.id else str(log.target),
             'user_id': str(log.user.id),
             'username': str(log.user.name),
             'action': str(log.action.name),
             'reason': log.reason,
             'created_at': log.created_at.isoformat(),
         }
+        if log.target:
+            log_dict["target"] = f"{str(log.target)} ({str(log.target.id)})" if log.target.id else str(log.target),
 
         logs_json.append(log_dict)
 
