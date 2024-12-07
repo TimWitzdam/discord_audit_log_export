@@ -6,7 +6,7 @@ async def to_json(audit_log):
 
     for log in audit_log:
         log_dict = {
-            'target': str(log.target),
+            'target': f"{str(log.target)} ({str(log.target.id)})" if log.target.id else str(log.target),
             'user_id': str(log.user.id),
             'username': str(log.user.name),
             'action': str(log.action.name),
@@ -14,12 +14,6 @@ async def to_json(audit_log):
             'created_at': log.created_at.isoformat(),
         }
 
-        """change_dict = {
-            'before': log.changes.before,
-            'after': log.changes.after
-        }
-        log_dict['changes'].append(change_dict)
-"""
         logs_json.append(log_dict)
 
     return logs_json
