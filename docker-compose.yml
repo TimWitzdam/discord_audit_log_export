@@ -1,0 +1,14 @@
+services:
+  discord-audit-log-export:
+    container_name: discord-audit-log-export
+    image: discord-audit-log-export
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: base
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      BOT_INVITE: ${BOT_INVITE}
+      DEFAULT_LIMIT: ${DEFAULT_LIMIT}
+      MAX_LIMIT: ${MAX_LIMIT}
+    restart: always
