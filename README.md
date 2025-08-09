@@ -7,26 +7,22 @@
 </div>
 <br />
 
-
 ## 🚀 Getting started (Discord Bot)
 
 1. Invite the bot to your server: [Invite](https://discord.com/oauth2/authorize?client_id=544944976853729300&permissions=2147485824&integration_type=0&scope=bot)
 2. Use the /export command to export the audit log of your server
 
-
 ## 🖥️ Getting started (Selfhosted)
 
-1. Clone/download the repo
+1. Prerequisites
+
+Make sure you have Docker and Docker Compose installed
+
+2. Clone/download the repo
 
 ```
 git clone https://github.com/TimWitzdam/discord_audit_log_export.git
 cd discord_audit_log_export
-```
-
-2. Install packages
-
-```
-pip3 install -r requirements.txt
 ```
 
 3. Create .env file
@@ -43,7 +39,7 @@ MAX_LIMIT=10000
 4. Start the bot
 
 ```
-python3 main.py
+docker compose up
 ```
 
 ## 🧞 Commands
@@ -51,11 +47,10 @@ python3 main.py
 All commands that are available for the bot.
 
 | Command                             | Action                                                        |
-|:------------------------------------|:--------------------------------------------------------------|
+| :---------------------------------- | :------------------------------------------------------------ |
 | `/export [data_type] [(opt) limit]` | Exports your audit log to the desired data type (JSON or CSV) |
 | `/help`                             | Returns all commands of the bot                               |
 | `/invite`                           | Sends the invite link configured in the .env                  |
-
 
 ## 👀 Any questions or problems?
 
