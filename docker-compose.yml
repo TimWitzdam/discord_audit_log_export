@@ -1,7 +1,6 @@
 services:
   discord-audit-log-export:
     container_name: discord-audit-log-export
-    image: discord-audit-log-export
     build:
       context: ./
       dockerfile: Dockerfile

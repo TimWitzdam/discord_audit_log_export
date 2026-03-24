@@ -10,7 +10,11 @@ async def to_json(audit_log):
         if action is not None:
             entry["action"] = getattr(action, "name", str(action))
 
-        category = getattr(log, "category", None)
+        category = None
+        try:
+            category = log.category
+        except Exception:
+            category = None
         if category is not None:
             entry["category"] = getattr(category, "name", str(category))
 
